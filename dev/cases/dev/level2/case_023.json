@@ -1,0 +1,169 @@
+{
+ "metadata": {
+  "max_time_steps": 60,
+  "description": "generated level 2 (ladder)"
+ },
+ "nodes": [
+  {
+   "id": 0,
+   "name": "Travel-0",
+   "type": "travel"
+  },
+  {
+   "id": 1,
+   "name": "Travel-1",
+   "type": "travel"
+  },
+  {
+   "id": 2,
+   "name": "Travel-2",
+   "type": "travel"
+  },
+  {
+   "id": 3,
+   "name": "Travel-3",
+   "type": "travel"
+  },
+  {
+   "id": 4,
+   "name": "Travel-4",
+   "type": "travel"
+  },
+  {
+   "id": 5,
+   "name": "Travel-5",
+   "type": "travel"
+  },
+  {
+   "id": 6,
+   "name": "Travel-6",
+   "type": "travel"
+  },
+  {
+   "id": 7,
+   "name": "Storage-7",
+   "type": "storage"
+  },
+  {
+   "id": 8,
+   "name": "Travel-8",
+   "type": "travel"
+  },
+  {
+   "id": 9,
+   "name": "Station-9",
+   "type": "station"
+  }
+ ],
+ "edges": [
+  {
+   "from_node": 0,
+   "to_node": 1,
+   "weight": 5
+  },
+  {
+   "from_node": 5,
+   "to_node": 6,
+   "weight": 1,
+   "capacity": 1
+  },
+  {
+   "from_node": 1,
+   "to_node": 2,
+   "weight": 1,
+   "capacity": 1
+  },
+  {
+   "from_node": 6,
+   "to_node": 7,
+   "weight": 6,
+   "capacity": 1
+  },
+  {
+   "from_node": 2,
+   "to_node": 3,
+   "weight": 4,
+   "capacity": 1
+  },
+  {
+   "from_node": 7,
+   "to_node": 8,
+   "weight": 2,
+   "capacity": 1
+  },
+  {
+   "from_node": 3,
+   "to_node": 4,
+   "weight": 2
+  },
+  {
+   "from_node": 8,
+   "to_node": 9,
+   "weight": 4,
+   "capacity": 1
+  },
+  {
+   "from_node": 0,
+   "to_node": 5,
+   "weight": 2,
+   "capacity": 1
+  },
+  {
+   "from_node": 1,
+   "to_node": 6,
+   "weight": 5,
+   "capacity": 1
+  },
+  {
+   "from_node": 4,
+   "to_node": 9,
+   "weight": 6
+  }
+ ],
+ "drive_units": [
+  {
+   "id": 0,
+   "start_node": 3
+  },
+  {
+   "id": 1,
+   "start_node": 0
+  },
+  {
+   "id": 2,
+   "start_node": 1
+  }
+ ],
+ "pods": [
+  {
+   "id": "P1",
+   "source_node": 7,
+   "destination_station": 9,
+   "entry_time": 0
+  },
+  {
+   "id": "P3",
+   "source_node": 7,
+   "destination_station": 9,
+   "entry_time": 0
+  },
+  {
+   "id": "P5",
+   "source_node": 7,
+   "destination_station": 9,
+   "entry_time": 1
+  },
+  {
+   "id": "P4",
+   "source_node": 7,
+   "destination_station": 9,
+   "entry_time": 5
+  },
+  {
+   "id": "P2",
+   "source_node": 7,
+   "destination_station": 9,
+   "entry_time": 15
+  }
+ ]
+}

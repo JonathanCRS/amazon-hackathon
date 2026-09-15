@@ -1,0 +1,74 @@
+{
+ "metadata": {
+  "max_time_steps": 60,
+  "description": "generated level 1 (tree)"
+ },
+ "nodes": [
+  {
+   "id": 0,
+   "name": "Travel-0",
+   "type": "travel"
+  },
+  {
+   "id": 1,
+   "name": "Travel-1",
+   "type": "travel"
+  },
+  {
+   "id": 2,
+   "name": "Station-2",
+   "type": "station"
+  },
+  {
+   "id": 3,
+   "name": "Travel-3",
+   "type": "travel"
+  },
+  {
+   "id": 4,
+   "name": "Storage-4",
+   "type": "storage"
+  }
+ ],
+ "edges": [
+  {
+   "from_node": 0,
+   "to_node": 1,
+   "weight": 2
+  },
+  {
+   "from_node": 1,
+   "to_node": 2,
+   "weight": 2
+  },
+  {
+   "from_node": 0,
+   "to_node": 3,
+   "weight": 2
+  },
+  {
+   "from_node": 1,
+   "to_node": 4,
+   "weight": 1
+  },
+  {
+   "from_node": 4,
+   "to_node": 2,
+   "weight": 2
+  }
+ ],
+ "drive_units": [
+  {
+   "id": 0,
+   "start_node": 4
+  }
+ ],
+ "pods": [
+  {
+   "id": "P1",
+   "source_node": 4,
+   "destination_station": 2,
+   "entry_time": 25
+  }
+ ]
+}

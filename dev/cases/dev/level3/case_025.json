@@ -1,0 +1,186 @@
+{
+ "metadata": {
+  "max_time_steps": 240,
+  "description": "generated level 3 (tree)"
+ },
+ "nodes": [
+  {
+   "id": 0,
+   "name": "Travel-0",
+   "type": "travel"
+  },
+  {
+   "id": 1,
+   "name": "Travel-1",
+   "type": "travel"
+  },
+  {
+   "id": 2,
+   "name": "Travel-2",
+   "type": "travel"
+  },
+  {
+   "id": 3,
+   "name": "Station-3",
+   "type": "station",
+   "capacity": 1
+  },
+  {
+   "id": 4,
+   "name": "Station-4",
+   "type": "station",
+   "capacity": 1
+  },
+  {
+   "id": 5,
+   "name": "Storage-5",
+   "type": "storage"
+  },
+  {
+   "id": 6,
+   "name": "Travel-6",
+   "type": "travel"
+  },
+  {
+   "id": 7,
+   "name": "Travel-7",
+   "type": "travel"
+  },
+  {
+   "id": 8,
+   "name": "Travel-8",
+   "type": "travel"
+  }
+ ],
+ "edges": [
+  {
+   "from_node": 0,
+   "to_node": 1,
+   "weight": 5
+  },
+  {
+   "from_node": 1,
+   "to_node": 2,
+   "weight": 3,
+   "capacity": 1
+  },
+  {
+   "from_node": 1,
+   "to_node": 3,
+   "weight": 3,
+   "capacity": 2
+  },
+  {
+   "from_node": 0,
+   "to_node": 4,
+   "weight": 3
+  },
+  {
+   "from_node": 1,
+   "to_node": 5,
+   "weight": 5,
+   "capacity": 1
+  },
+  {
+   "from_node": 4,
+   "to_node": 6,
+   "weight": 4
+  },
+  {
+   "from_node": 1,
+   "to_node": 7,
+   "weight": 5
+  },
+  {
+   "from_node": 1,
+   "to_node": 8,
+   "weight": 5
+  },
+  {
+   "from_node": 7,
+   "to_node": 6,
+   "weight": 4,
+   "capacity": 1
+  },
+  {
+   "from_node": 7,
+   "to_node": 3,
+   "weight": 3,
+   "capacity": 1
+  },
+  {
+   "from_node": 6,
+   "to_node": 8,
+   "weight": 2,
+   "capacity": 1
+  }
+ ],
+ "drive_units": [
+  {
+   "id": 0,
+   "start_node": 7,
+   "capacity": 3
+  },
+  {
+   "id": 1,
+   "start_node": 1,
+   "capacity": 2
+  }
+ ],
+ "pods": [
+  {
+   "id": "P4",
+   "source_node": 5,
+   "destination_station": 3,
+   "entry_time": 0
+  },
+  {
+   "id": "P6",
+   "source_node": 5,
+   "destination_station": 4,
+   "entry_time": 0
+  },
+  {
+   "id": "P8",
+   "source_node": 5,
+   "destination_station": 4,
+   "entry_time": 0
+  },
+  {
+   "id": "P1",
+   "source_node": 5,
+   "destination_station": 3,
+   "entry_time": 4
+  },
+  {
+   "id": "P5",
+   "source_node": 5,
+   "destination_station": 3,
+   "entry_time": 5
+  },
+  {
+   "id": "P3",
+   "source_node": 5,
+   "destination_station": 4,
+   "entry_time": 13
+  },
+  {
+   "id": "P2",
+   "source_node": 5,
+   "destination_station": 3,
+   "entry_time": 15
+  },
+  {
+   "id": "P7",
+   "source_node": 5,
+   "destination_station": 4,
+   "entry_time": 20
+  },
+  {
+   "id": "P9",
+   "source_node": 5,
+   "destination_station": 3,
+   "entry_time": 25
+  }
+ ]
+}

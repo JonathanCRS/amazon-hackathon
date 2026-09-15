@@ -1,0 +1,126 @@
+{
+ "metadata": {
+  "max_time_steps": 90,
+  "description": "generated level 3 (tree)"
+ },
+ "nodes": [
+  {
+   "id": 0,
+   "name": "Travel-0",
+   "type": "travel"
+  },
+  {
+   "id": 1,
+   "name": "Travel-1",
+   "type": "travel"
+  },
+  {
+   "id": 2,
+   "name": "Travel-2",
+   "type": "travel"
+  },
+  {
+   "id": 3,
+   "name": "Travel-3",
+   "type": "travel"
+  },
+  {
+   "id": 4,
+   "name": "Storage-4",
+   "type": "storage"
+  },
+  {
+   "id": 5,
+   "name": "Station-5",
+   "type": "station",
+   "capacity": 1
+  },
+  {
+   "id": 6,
+   "name": "Storage-6",
+   "type": "storage"
+  }
+ ],
+ "edges": [
+  {
+   "from_node": 0,
+   "to_node": 1,
+   "weight": 4,
+   "capacity": 2
+  },
+  {
+   "from_node": 0,
+   "to_node": 2,
+   "weight": 2
+  },
+  {
+   "from_node": 1,
+   "to_node": 3,
+   "weight": 4
+  },
+  {
+   "from_node": 1,
+   "to_node": 4,
+   "weight": 2
+  },
+  {
+   "from_node": 2,
+   "to_node": 5,
+   "weight": 1
+  },
+  {
+   "from_node": 0,
+   "to_node": 6,
+   "weight": 6,
+   "capacity": 1
+  },
+  {
+   "from_node": 3,
+   "to_node": 6,
+   "weight": 3
+  },
+  {
+   "from_node": 5,
+   "to_node": 1,
+   "weight": 2
+  }
+ ],
+ "drive_units": [
+  {
+   "id": 0,
+   "start_node": 2,
+   "capacity": 2
+  },
+  {
+   "id": 1,
+   "start_node": 0,
+   "capacity": 2
+  }
+ ],
+ "pods": [
+  {
+   "id": "P3",
+   "source_node": 6,
+   "destination_station": 5,
+   "entry_time": 0
+  },
+  {
+   "id": "P4",
+   "source_node": 4,
+   "destination_station": 5,
+   "entry_time": 0
+  },
+  {
+   "id": "P2",
+   "source_node": 6,
+   "destination_station": 5,
+   "entry_time": 15
+  },
+  {
+   "id": "P1",
+   "source_node": 4,
+   "destination_station": 5,
+   "entry_time": 25
+  }
+ ]
+}

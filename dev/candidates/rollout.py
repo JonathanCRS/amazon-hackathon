@@ -1,12 +1,4 @@
 """
-Amazon Robotics Hackathon - Routing API
-
-*****IMPORTANT*****
-Team name: Boys+Megan
-Email address: meganong1@gmail.com, jonathncrsinaga@gmail.com, jeffersonabrahamdermawan@gmail.com
-*******************
-"""
-"""
 Rollout planner: receding-horizon plan search evaluated by an exact internal
 simulator of the game engine.
 
