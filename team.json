@@ -1,5 +1,5 @@
 {
-    "name": "<Your name or your team's name>",
-    "emails": ["<team member emails, e.g. student@ubc.ca>"],
+    "name": "Boys+Megan",
+    "emails": ["meganong1@gmail.com", "jonathncrsinaga@gmail.com", "jeffersonabrahamdermawan@gmail.com"],
     "submit_url": "https://ar-hackathon-2026-submissions.s3.amazonaws.com/?key=2026%2F%24%7Bfilename%7D&x-amz-algorithm=AWS4-HMAC-SHA256&x-amz-credential=AKIARXIQ6VNHV6YGDT74%2F20260915%2Fus-east-1%2Fs3%2Faws4_request&x-amz-date=20260915T011223Z&policy=eyJleHBpcmF0aW9uIjogIjIwMjYtMDktMjJUMDE6MTI6MjNaIiwgImNvbmRpdGlvbnMiOiBbWyJjb250ZW50LWxlbmd0aC1yYW5nZSIsIDEsIDUyNDI4ODBdLCB7ImJ1Y2tldCI6ICJhci1oYWNrYXRob24tMjAyNi1zdWJtaXNzaW9ucyJ9LCBbInN0YXJ0cy13aXRoIiwgIiRrZXkiLCAiMjAyNi8iXSwgeyJ4LWFtei1hbGdvcml0aG0iOiAiQVdTNC1ITUFDLVNIQTI1NiJ9LCB7IngtYW16LWNyZWRlbnRpYWwiOiAiQUtJQVJYSVE2Vk5IVjZZR0RUNzQvMjAyNjA5MTUvdXMtZWFzdC0xL3MzL2F3czRfcmVxdWVzdCJ9LCB7IngtYW16LWRhdGUiOiAiMjAyNjA5MTVUMDExMjIzWiJ9XX0%3D&x-amz-signature=f3f1b8cc02ca9fcfff7bd234bbb6fcc2b28e5aaf93b1311a628693f1030e0447"
 }
