@@ -1,39 +1,16 @@
-"""
-Amazon Robotics Hackathon - Routing API
-
-This module defines the routing API for the Amazon Robotics Hackathon.
-Students will implement the drive_unit_next_move function in this module.
-
-*****IMPORTANT*****
-Team name: Boys+Megan
-Email address: meganong1@gmail.com, jonathncrsinaga@gmail.com, jeffersonabrahamdermawan@gmail.com
-*******************
-"""
-
 import heapq
 from itertools import permutations
 from typing import Dict, List, Optional, Tuple
 from ar_hackathon.models.graph_state import GraphState
 
-# --------------------------------------------------------------------------
-# Tunable parameters
-# --------------------------------------------------------------------------
-AGE_BONUS = 0.15           # Favour pods that have already been waiting a while
-DETOUR_SLACK = 2.20        # Allowed detour ratio for an opportunistic pickup
-CONGESTION_PENALTY = 2.0   # Extra routing cost for an aisle that is full now
-MAX_TSP_STOPS = 4          # Brute-force drop-off ordering up to this many stops
-MAX_ASSIGN_PODS = 60       # Cap pods considered per unit when assigning
+AGE_BONUS = 0.15
+DETOUR_SLACK = 2.20
+CONGESTION_PENALTY = 2.0
+MAX_TSP_STOPS = 4
+MAX_ASSIGN_PODS = 60
 
 INF = float('inf')
 
-# --------------------------------------------------------------------------
-# Static graph cache.
-#
-# The floor never changes during a run, so adjacency and shortest paths are
-# computed once and reused. Shortest paths are computed lazily per source
-# node and cached, which keeps memory small on large floors while making
-# repeated queries from the same handful of nodes essentially free.
-# --------------------------------------------------------------------------
 _cache: Dict[str, object] = {}
 
 
@@ -47,7 +24,6 @@ def _signature(state: GraphState) -> Tuple:
 
 
 def _graph(state: GraphState):
-    """Adjacency list for the floor, built once per topology."""
     sig = _signature(state)
     if _cache.get("sig") != sig:
         adj: Dict[int, List[Tuple[int, float]]] = {n.id: [] for n in state.nodes}
@@ -62,12 +38,6 @@ def _graph(state: GraphState):
 
 
 def _paths_from(state: GraphState, source: int):
-    """
-    Cached Dijkstra from `source`.
-
-    Returns (dist, first_hop) where first_hop[target] is the neighbour of
-    `source` to step onto for the cheapest route to `target`.
-    """
     adj = _graph(state)
     sp = _cache["sp"]
     cached = sp.get(source)
@@ -100,18 +70,7 @@ def _dist(state: GraphState, a: int, b: int) -> float:
     return _paths_from(state, a)[0].get(b, INF)
 
 
-# --------------------------------------------------------------------------
-# Per-call traffic snapshot
-# --------------------------------------------------------------------------
 class _Traffic:
-    """
-    Occupancy tables built once per call.
-
-    GraphState's helpers rescan every edge and unit on each query, which is
-    fine for a small floor but expensive inside a Dijkstra loop. Counting
-    everything up front keeps each lookup O(1).
-    """
-
     __slots__ = ("edge_cap", "edge_occ", "node_cap", "node_occ", "congested")
 
     def __init__(self, state: GraphState):
@@ -124,7 +83,6 @@ class _Traffic:
             key = self._key(e.from_node, e.to_node)
             self.edge_cap[key] = e.capacity
             if not e.bidirectional:
-                # Directed edges still share a key; keep the tighter capacity.
                 prev = self.edge_cap.get(key)
                 if prev is not None and e.capacity is not None:
                     self.edge_cap[key] = min(prev, e.capacity)
@@ -141,8 +99,6 @@ class _Traffic:
                 dest = u.current_node
             self.node_occ[dest] = self.node_occ.get(dest, 0) + 1
 
-        # Is anything actually constrained right now? If not we can take the
-        # fast static route without a dynamic search.
         self.congested = False
         for key, occ in self.edge_occ.items():
             cap = self.edge_cap.get(key)
@@ -170,7 +126,6 @@ class _Traffic:
         return cap is not None and self.node_occ.get(node_id, 0) >= cap
 
     def can_enter(self, state: GraphState, unit, nxt: int) -> bool:
-        """Mirror of the engine's validity rule, so we never waste a step."""
         if nxt is None or nxt == unit.current_node:
             return False
         if state.get_edge(unit.current_node, nxt) is None:
@@ -180,18 +135,8 @@ class _Traffic:
         return not self.node_full(nxt)
 
 
-# --------------------------------------------------------------------------
-# Congestion-aware routing
-# --------------------------------------------------------------------------
 def _dynamic_hop(state: GraphState, traffic: _Traffic, start: int, target: int,
                  avoid_first: Optional[int] = None) -> Optional[int]:
-    """
-    Shortest path that respects current traffic.
-
-    Full aisles are penalised rather than banned (they usually clear soon),
-    while full nodes are treated as impassable so we never route through a
-    dock we cannot enter.
-    """
     if start == target:
         return None
     adj = _graph(state)
@@ -231,13 +176,10 @@ def _dynamic_hop(state: GraphState, traffic: _Traffic, start: int, target: int,
 
 
 def _route(state: GraphState, traffic: _Traffic, unit, target: int) -> Optional[int]:
-    """Pick this step's hop toward `target`, or None to wait."""
     here = unit.current_node
     if target == here:
         return None
 
-    # Fast path: nothing on the floor is constrained, so the static
-    # shortest path is already the right answer.
     if not traffic.congested:
         hop = _paths_from(state, here)[1].get(target)
         if hop is not None and traffic.can_enter(state, unit, hop):
@@ -247,46 +189,35 @@ def _route(state: GraphState, traffic: _Traffic, unit, target: int) -> Optional[
     if hop is not None and traffic.can_enter(state, unit, hop):
         return hop
 
-    # We are standing at the door and the dock is simply occupied. Docks
-    # free up within a step or two, so hold position - detouring around the
-    # floor to re-approach the same node only wastes time.
     if hop is not None and hop == target and traffic.node_full(target) \
             and not traffic.edge_full(here, hop):
         return None
 
-    # Best route is blocked this step - try the next-best first hop.
     alt = _dynamic_hop(state, traffic, here, target, avoid_first=hop)
     if alt is not None and traffic.can_enter(state, unit, alt):
         return alt
 
-    # Everything is blocked; waiting beats wasting the step on a bad move.
     return None
 
 
-# --------------------------------------------------------------------------
-# Global planning: which unit chases which pod
-# --------------------------------------------------------------------------
 def _anchor(unit) -> Tuple[int, float]:
-    """Where a unit effectively is, and how long until it is free there."""
     if unit.in_transit:
         return unit.transit_destination, float(unit.transit_remaining_time)
     return unit.current_node, 0.0
 
 
 def _assign(state: GraphState) -> Dict[int, str]:
-    """
-    Greedily give each waiting pod to at most one drive unit.
+    now = state.current_time_step
+    if _cache.get("assign_step") == now:
+        return _cache["assign"]
 
-    Cost is how soon a unit could reach the pod, discounted by how long the
-    pod has already been waiting, so ageing pods (whose score is decaying)
-    get collected instead of abandoned.
-    """
     waiting = [p for p in state.active_pods
                if p.carried_by is None and p.current_node is not None]
     if not waiting:
+        _cache["assign_step"] = now
+        _cache["assign"] = {}
         return {}
 
-    now = state.current_time_step
     candidates = []
     for unit in state.drive_units:
         if unit.capacity - len(unit.carrying) <= 0:
@@ -296,8 +227,6 @@ def _assign(state: GraphState) -> Dict[int, str]:
 
         pods = waiting
         if len(pods) > MAX_ASSIGN_PODS:
-            # On a very busy floor only weigh the nearest pods, so planning
-            # stays well inside the per-call time budget.
             pods = sorted(pods, key=lambda p: dist.get(p.current_node, INF))
             pods = pods[:MAX_ASSIGN_PODS]
 
@@ -317,16 +246,13 @@ def _assign(state: GraphState) -> Dict[int, str]:
         assignment[unit_id] = pod_id
         used_units.add(unit_id)
         used_pods.add(pod_id)
+
+    _cache["assign_step"] = now
+    _cache["assign"] = assignment
     return assignment
 
 
 def _next_dropoff(state: GraphState, unit) -> Optional[int]:
-    """
-    Which station to head for given everything this unit is carrying.
-
-    For a handful of destinations we brute-force the visiting order; beyond
-    that we fall back to nearest-first.
-    """
     dests = []
     for pod_id in unit.carrying:
         pod = state.get_pod(pod_id)
@@ -359,13 +285,6 @@ def _next_dropoff(state: GraphState, unit) -> Optional[int]:
 
 
 def _vacate(state: GraphState, traffic: _Traffic, unit) -> Optional[int]:
-    """
-    Step off a capacity-limited node when there is nothing to do there.
-
-    An idle unit parked on a single-dock station counts against that
-    station's capacity and blocks every other unit from delivering, which
-    strands pods completely. Prefer stepping onto an uncapped neighbour.
-    """
     if traffic.node_cap.get(unit.current_node) is None:
         return None
 
@@ -380,17 +299,10 @@ def _vacate(state: GraphState, traffic: _Traffic, unit) -> Optional[int]:
 
 
 def _reposition(state: GraphState, unit) -> Optional[int]:
-    """
-    With no pod to chase, drift toward where work tends to appear.
-
-    Pods spawn at storage nodes, and a unit already standing on one picks up
-    the moment a pod lands, so idle units stage themselves there.
-    """
     storages = [n.id for n in state.nodes if n.node_type == "storage"]
     if not storages or unit.current_node in storages:
         return None
 
-    # Don't crowd a storage node another idle unit already covers.
     claimed = {u.current_node for u in state.drive_units
                if u.id != unit.id and not u.in_transit and not u.carrying}
     options = [s for s in storages if s not in claimed] or storages
@@ -400,9 +312,6 @@ def _reposition(state: GraphState, unit) -> Optional[int]:
     return target if dist.get(target, INF) != INF else None
 
 
-# --------------------------------------------------------------------------
-# Main entry point
-# --------------------------------------------------------------------------
 def _decide(drive_unit_id: int, state: GraphState) -> Optional[int]:
     unit = state.get_drive_unit(drive_unit_id)
     if unit is None or unit.in_transit:
@@ -411,7 +320,6 @@ def _decide(drive_unit_id: int, state: GraphState) -> Optional[int]:
     traffic = _Traffic(state)
     here = unit.current_node
 
-    # ---- Choose a target ----------------------------------------------
     dropoff = _next_dropoff(state, unit) if unit.carrying else None
 
     pickup = None
@@ -422,7 +330,6 @@ def _decide(drive_unit_id: int, state: GraphState) -> Optional[int]:
             pickup = pod.current_node
 
     if dropoff is not None and pickup is not None:
-        # Carrying, but with room to spare: is that pod roughly on the way?
         direct = _dist(state, here, dropoff)
         detour = _dist(state, here, pickup) + _dist(state, pickup, dropoff)
         target = pickup if detour <= direct * DETOUR_SLACK else dropoff
@@ -433,7 +340,6 @@ def _decide(drive_unit_id: int, state: GraphState) -> Optional[int]:
     else:
         target = None
 
-    # ---- Idle: keep docks clear, then stage near future work ----------
     if target is None:
         step_off = _vacate(state, traffic, unit)
         if step_off is not None:
@@ -448,37 +354,9 @@ def _decide(drive_unit_id: int, state: GraphState) -> Optional[int]:
 
 
 def drive_unit_next_move(drive_unit_id: int, state: GraphState) -> Optional[int]:
-    """
-    Determine the next node for a drive unit to move to.
-
-    Strategy:
-      1. Cache the floor's shortest paths (topology never changes), lazily
-         per source node so large floors stay cheap.
-      2. Globally assign waiting pods so two units never chase the same pod,
-         biased toward pods that have been waiting longest.
-      3. When carrying, head for the best next drop-off, brute-forcing the
-         visiting order for a few destinations; detour to collect an extra
-         pod when there is spare capacity and the detour is cheap.
-      4. Route with a congestion-aware search that avoids full docks and
-         penalises saturated aisles, retrying an alternative first hop
-         before settling for a wait.
-      5. Never idle on a capacity-limited node - stepping off keeps the dock
-         free so other units can deliver - and stage idle units on storage
-         nodes, where pickups happen the instant a pod spawns.
-
-    Args:
-        drive_unit_id: ID of the drive unit being routed
-        state: GraphState object containing the current state of the floor
-
-    Returns:
-        next_node_id: ID of an adjacent node to move to, or None to wait
-                      at the current node
-    """
     try:
         return _decide(drive_unit_id, state)
     except Exception:
-        # Never let a bug cost a move: fall back to a plain shortest-path
-        # step toward the most useful target we can identify.
         try:
             unit = state.get_drive_unit(drive_unit_id)
             if unit is None or unit.in_transit:
